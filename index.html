@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>New Year Countdown</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;800&display=swap'); 
+        body {
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto Condensed', sans-serif;
+            background: url("https://images.unsplash.com/photo-1492086517200-9393d4eb53bf?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bmlnaHQlMjBza3klMjBjaXR5fGVufDB8fDB8fHww");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .title {
+            position: absolute;
+            font-size: 8rem;
+            font-weight: 800;
+            top: 10%;
+            text-transform: uppercase;
+        }
+
+        #newYearCountDown {
+            display: flex;
+            justify-content: center;
+            gap: 20%;
+            font-size: 15rem;
+            font-weight: 500;
+        }
+
+        #happyNewYear {
+            color: gold;
+            animation: grow 2s;
+            animation-fill-mode: forwards;
+            font-weight: 500;
+        }
+
+        @keyframes grow {
+            to {
+                transform: scale(10);
+            }
+        }   
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            z-index: -1;
+            left: 0;
+        }
+
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" class="hide"></canvas>
+    <div class="title">
+        New Year Countdown
+    </div>  
+    
+    <div id="newYearCountDown" class="">
+        <div class="yearDisplay"></div>
+        <div class="monthDisplay"></div>
+        <div class="dayDisplay"></div>
+        <div class="hourDisplay"></div>
+        <div class="minuteDisplay"></div>
+        <div class="secondDisplay"></div>
+    </div>
+    <div id="happyNewYear" class="hide">
+        HAPPY NEW YEAR!
+    </div>
+    <script type="text/javascript">
+        const newYearText = document.getElementById("happyNewYear");
+        const fireworks = document.getElementById("canvas");
+        let currentYear = (new Date()).getFullYear();
+
+        function milliToAny(ms,type) {
+            let totalMs = ms;
+            
+            totalMs /= 1000;
+            if (type === "seconds") return totalMs;
+            totalMs /= 60;
+            if (type === "minutes") return totalMs;
+            totalMs /= 60;
+            if (type === "hours") return totalMs;
+            totalMs /= 24;
+            if (type === "days") return totalMs;
+            totalMs /= 365;
+            if (type === "years") return totalMs;
+
+            throw new Error(`${type} is not a valid type`);
+        }
+        
+        function display(deltaDate) {
+            const yearDisplay = document.querySelector(".yearDisplay"); 
+            const monthDisplay = document.querySelector(".monthDisplay"); 
+            const dayDisplay = document.querySelector(".dayDisplay"); 
+            const hourDisplay = document.querySelector(".hourDisplay"); 
+            const minuteDisplay = document.querySelector(".minuteDisplay"); 
+            const secondDisplay = document.querySelector(".secondDisplay"); 
+
+
+            const yearLeft = 1970 - deltaDate.getFullYear();
+            const monthLeft = deltaDate.getMonth();
+            const dayLeft = deltaDate.getDate() - 1;
+            const hourLeft = deltaDate.getHours() - 8;
+            const minuteLeft = deltaDate.getMinutes();
+            const secondLeft = deltaDate.getSeconds();
+
+            yearDisplay.innerHTML = String(yearLeft);
+            monthDisplay.innerHTML = String(monthLeft);
+            dayDisplay.innerHTML = String(dayLeft);
+            hourDisplay.innerHTML = String(hourLeft).padStart(2,"0");
+            minuteDisplay.innerHTML = String(minuteLeft).padStart(2,"0");
+            secondDisplay.innerHTML = String(secondLeft).padStart(2,"0");
+
+            const displays = document.querySelectorAll("#newYearCountDown > div");
+            const lefts = [yearLeft,monthLeft,dayLeft,hourLeft,minuteLeft,secondLeft];
+            for (let i = 0;i < lefts.length;i++) {
+                if (lefts[i]) break;
+                displays[i].classList.add("hide");
+            }
+        }
+
+        function update() {
+            const currentDate = new Date();
+            const updateYear = currentDate.getFullYear();
+            const newYearDate = new Date(currentDate.getFullYear() +  1,0);
+            const deltaNumber = newYearDate.getTime() - currentDate.getTime();
+            const deltaDate = new Date(deltaNumber);
+            
+            if (updateYear != currentYear) {
+                currentYear = updateYear;
+                newYearText.classList.remove("hide");
+                fireworks.classList.remove("hide");
+                return;
+            }
+            display(deltaDate);
+            requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+
+
+        // code from CodeSky just copied it hehehe, because it's 5 hours before new year and I have other things to do.
+        (function() {
+            
+            let canvas, width, height, ctx;
+            let fireworks = [];
+            let particles = [];
+
+            function setup() {
+                canvas = document.getElementById("canvas");
+                setSize(canvas);
+                ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(0, 0, width, height);
+                fireworks.push(new Firework(Math.random()*(width-200)+100));
+                window.addEventListener("resize",windowResized);
+                document.addEventListener("click",onClick);
+            }
+
+            setTimeout(setup,1);
+
+            function loop(){
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(0, 0, width, height);
+                ctx.globalAlpha = 1;
+
+                for(let i=0; i<fireworks.length; i++){
+                    let done = fireworks[i].update();
+                    fireworks[i].draw();
+                    if(done) fireworks.splice(i, 1);
+                }
+
+                for(let i=0; i<particles.length; i++){
+                    particles[i].update();
+                    particles[i].draw();
+                    if(particles[i].lifetime>80) particles.splice(i,1);
+                }
+
+                if(Math.random()<1/60) fireworks.push(new Firework(Math.random()*(width-200)+100));
+            }
+            setInterval(loop, 1/60);
+            //setInterval(loop, 100/60);
+            class Particle{
+                constructor(x, y, col){
+                    this.x = x;
+                    this.y = y;
+                    this.col = col;
+                    this.vel = randomVec(2);
+                    this.lifetime = 0;
+                }
+
+                update(){
+                    this.x += this.vel.x;
+                    this.y += this.vel.y;
+                    this.vel.y += 0.02;
+                    this.vel.x *= 0.99;
+                    this.vel.y *= 0.99;
+                    this.lifetime++;
+                }
+
+                draw(){
+                    ctx.globalAlpha = Math.max(1-this.lifetime/80, 0);
+                    ctx.fillStyle = this.col;
+                    ctx.fillRect(this.x, this.y, 2, 2);
+                }
+            }
+
+            class Firework{
+                constructor(x){
+                    this.x = x;
+                    this.y = height;
+                    this.isBlown = false;
+                    this.col = randomCol();
+                }
+
+                update(){
+                    this.y -= 3;
+                    if(this.y < 350-Math.sqrt(Math.random()*500)*40){
+                        this.isBlown = true;
+                        for(let i=0; i<60; i++){
+                            particles.push(new Particle(this.x, this.y, this.col))
+                        }
+                    }
+                    return this.isBlown;
+                }
+
+                draw(){
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = this.col;
+                    ctx.fillRect(this.x, this.y, 2, 2);
+                }
+            }
+
+            function randomCol(){
+                var letter = '0123456789ABCDEF';
+                var nums = [];
+
+                for(var i=0; i<3; i++){
+                    nums[i] = Math.floor(Math.random()*256);
+                }
+
+                let brightest = 0;
+                for(var i=0; i<3; i++){
+                    if(brightest<nums[i]) brightest = nums[i];
+                }
+
+                brightest /=255;
+                for(var i=0; i<3; i++){
+                    nums[i] /= brightest;
+                }
+
+                let color = "#";
+                for(var i=0; i<3; i++){
+                    color += letter[Math.floor(nums[i]/16)];
+                    color += letter[Math.floor(nums[i]%16)];
+                }
+                return color;
+            }
+
+            function randomVec(max){
+                let dir = Math.random()*Math.PI*2;
+                let spd = Math.random()*max;
+                return{x: Math.cos(dir)*spd, y: Math.sin(dir)*spd};
+            }
+
+            function setSize(canv){
+                canv.style.width = (innerWidth) + "px";
+                canv.style.height = (innerHeight) + "px";
+                width = innerWidth;
+                height = innerHeight;
+
+                canv.width = innerWidth*window.devicePixelRatio;
+                canv.height = innerHeight*window.devicePixelRatio;
+                canvas.getContext("2d").scale(window.devicePixelRatio, window.devicePixelRatio);
+            }
+
+            function onClick(e){
+                fireworks.push(new Firework(e.clientX));
+            }
+
+            function windowResized(){
+                setSize(canvas);
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(0, 0, width, height);
+            }
+       })();
+    </script>
+</body>
+</html>
