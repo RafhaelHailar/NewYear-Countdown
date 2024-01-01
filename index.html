@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +32,6 @@
         #newYearCountDown {
             display: flex;
             justify-content: center;
-            gap: 20%;
             font-size: 15rem;
             font-weight: 500;
         }
@@ -111,7 +109,7 @@
             const secondDisplay = document.querySelector(".secondDisplay"); 
 
 
-            const yearLeft = 1970 - deltaDate.getFullYear();
+            const yearLeft = deltaDate.getFullYear() - 1970;
             const monthLeft = deltaDate.getMonth();
             const dayLeft = deltaDate.getDate() - 1;
             const hourLeft = deltaDate.getHours() - 8;
@@ -127,10 +125,15 @@
 
             const displays = document.querySelectorAll("#newYearCountDown > div");
             const lefts = [yearLeft,monthLeft,dayLeft,hourLeft,minuteLeft,secondLeft];
+            let totalDisplay = displays.length;
             for (let i = 0;i < lefts.length;i++) {
+                totalDisplay--;
                 if (lefts[i]) break;
                 displays[i].classList.add("hide");
             }
+
+            const displaysContainer = document.getElementById("newYearCountDown");
+            displaysContainer.style.gap = `${20 - (totalDisplay * 3)}%`;
         }
 
         function update() {
@@ -143,6 +146,7 @@
             if (updateYear != currentYear) {
                 currentYear = updateYear;
                 newYearText.classList.remove("hide");
+                createFireWorks();
                 fireworks.classList.remove("hide");
                 return;
             }
@@ -153,7 +157,7 @@
 
 
         // code from CodeSky just copied it hehehe, because it's 5 hours before new year and I have other things to do.
-        (function() {
+        function createFireWorks() {
             
             let canvas, width, height, ctx;
             let fireworks = [];
@@ -297,7 +301,7 @@
                 ctx.fillStyle = "#000000";
                 ctx.fillRect(0, 0, width, height);
             }
-       })();
+       }
     </script>
 </body>
 </html>
